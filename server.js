@@ -10,12 +10,16 @@ const server = http.createServer((req, res) => {
     let file = urlObj.pathname === '/' ? '/html/dp.html' : urlObj.pathname;
     console.log(`${req.method} ${file}`);
     fs.stat(path.join(__dirname, file), (err, stats) => {
-        if (err || !stats.isFile()) file = '/html/404.html';
+        if (err || !stats.isFile()) {
+            file = '/html/404.html';
+            res.setHeader('Content-Type', mime.lookup(file));
+            res.writeHead(404);
+        } else {
+            res.setHeader('Content-Type', mime.lookup(file));
+            res.writeHead(200);
+        }
         console.log(colors.green(file));
-        let rs = fs.createReadStream(path.join(__dirname, file));
-        res.writeHead(200, {
-            'Content-Type': mime.lookup(file)
-        });
+        let rs = fs.createReadStream(path.join(__dirname, file));        
         rs.pipe(res);
     });
 });
